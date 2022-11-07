@@ -20,7 +20,6 @@ handler = WebhookHandler(config.get('line', 'channel_secret'))
 
 @app.route("/")
 def home():
-    db.test()
     return 'Web App with Python Flask!'
 
 # 接收 LINE 的資訊
