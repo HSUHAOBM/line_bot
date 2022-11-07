@@ -9,12 +9,7 @@ from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSend
 
 import configparser
 
-import urllib
-import re
-import random
-
-from custom_models import BossData,CallBossData
-import psycopg2
+from custom_models import boss, db
 
 
 app = Flask(__name__)
@@ -23,12 +18,12 @@ app = Flask(__name__)
 config = configparser.ConfigParser()
 config.read('config.ini')
 
-line_bot_api = LineBotApi(config.get('line-bot', 'channel_access_token'))
-handler = WebhookHandler(config.get('line-bot', 'channel_secret'))
+line_bot_api = LineBotApi(config.get('line', 'channel_access_token'))
+handler = WebhookHandler(config.get('line', 'channel_secret'))
 
 @app.route("/")
 def home():
-    return render_template("home.html")
+    return 'Web App with Python Flask!'
 
 # 接收 LINE 的資訊
 @app.route("/callback", methods=['POST'])
@@ -46,64 +41,61 @@ def callback():
     return 'OK'
 
 @handler.add(MessageEvent, message=TextMessage)
-def pixabay_isch(event):
+def handle_message(event):
     print(event)
-    if event.source.group_id =="C43a948aa2bf6460a64e1ebf916a44612":
-        print("群組編號，驗證成功")
+    # 驗證群組
+    if event.source.group_id =="C5a67676a5c08556a78b107c1ec642106":
 
-        if event.source.user_id != "Udeadbeefdeadbeefdeadbeefdeadbeef":
-            BossName,DeadForTime,NextForTime,OtherText,ErrorText=BossData.BossTime_record(event.message.text)
-            try:
-                if OtherText=="指令":
-                    line_bot_api.reply_message(event.reply_token,TextSendMessage(text="清除:資料庫重建、\n出:時間BoSS顯示、\n名稱:現有代號、\n紀錄:時間+名稱 \n ex.0101 不死鳥 \n"))
-                if OtherText=="清除":
-                    print("初始化")
+        input_text = event.message.text
+        print('使用者輸入',input_text)
+        try:
+            if len(input_text.split())==1:
+                # 介紹
+                if input_text == "指令":
+                    line_bot_api.reply_message(event.reply_token, TextSendMessage(
+                        text='''清除:資料庫重建、\n出:時間BoSS顯示、\n
+                                名稱:現有代號、\n紀錄:時間+名稱 \n ex.0101 不死鳥'''))
+                # 初始化DB
+                if input_text == "清除":
+                    print('清除')
 
                     line_bot_api.reply_message(event.reply_token,TextSendMessage(text="初始化"))
-                    CallBossData.DeleteAlldatabase()
-                    CallBossData.Resetdatabase()            
-                elif OtherText=="名稱": 
-                    line_bot_api.reply_message(event.reply_token,TextSendMessage(text=NAME))  
-                elif OtherText=="出": 
-                    outtext=CallBossData.updateDB()
-                    listouttext=CallBossData.ShowBossTimeList()
-                    # print("listouttext:",listouttext)
+                    db.clear_boss_time_record()
+                    db.reset_boss_time_record()
+
+                # 王代稱
+                if input_text == "名稱":
+                    line_bot_api.reply_message(event.reply_token,TextSendMessage(text=boss_nick_name))
+
+                # 回報王表
+                if input_text == "出":
+                    outtext = db.check_boss_time_record()
+                    listouttext = db.show_boss_time_record()
                     line_bot_api.reply_message(event.reply_token,TextSendMessage(text=outtext+listouttext))
-                elif BossName!=None and NextForTime != None:
-                    NextForTime = NextForTime.strftime('%m/%d %H:%M:%S')
-                    DeadForTime=DeadForTime.strftime('%m/%d %H:%M:%S')
-                    if(ErrorText!=None):
-                        line_bot_api.reply_message(event.reply_token,TextSendMessage(text="BOSS："+ BossName +"\n"+"死亡時間："+ DeadForTime +"\n"+"重生時間："+NextForTime+"\n"+ErrorText))
-                    else:
-                        line_bot_api.reply_message(event.reply_token,TextSendMessage(text="BOSS："+ BossName +"\n"+"死亡時間："+ DeadForTime +"\n"+"重生時間："+NextForTime))
 
-            except:
-                line_bot_api.reply_message(event.reply_token,TextSendMessage(text="無資料"))            
-                #TextSendMessage(text=str(event.source.user_id)+"　　？？？　　"+(event.message.text))) 
+            else:
+                boss_name, end_time, next_time, message = boss.boss_record(event.message.text)
+                line_bot_api.reply_message(event.reply_token,TextSendMessage(
+                    text = "BOSS："+ boss_name +"\n"+"死亡時間："+ end_time +"\n"+"重生時間："+next_time+"\n" + message))
+        except:
+            line_bot_api.reply_message(event.reply_token,TextSendMessage(text="輸入錯誤"))
 
+# 邀請事件
 @handler.add(JoinEvent)
 def handle_join(event):
-    # newcoming_text = "謝謝邀請我這個機器來至此群組！！我會盡力為大家服務的～"
-    newcoming_text = "Hello 0.0"
+    newcoming_text = "Hello 此機器人已綁定特定用戶群"
 
     line_bot_api.reply_message(
-            event.reply_token,
-            TextMessage(text=newcoming_text)
-        )
-    print("JoinEvent =", JoinEvent)
-    print("新群組的相關資訊", event.source)
-    print("event:",event)
+        event.reply_token,
+        TextMessage(text=newcoming_text)
+    )
 
+# 剔除群組事件
 @handler.add(LeaveEvent)
 def handle_leave(event):
-    print("leave Event =", event)
-    print("我被踢掉了QQ 相關資訊", event.source)
+    print("踢出-相關資訊", event.source)
 
-
-if __name__ == "__main__":
-    app.run()
-
-NAME="""
+boss_nick_name = """
 ["17","奇岩","浮士德","クライン"]
 ["4","4c","4C","4色","四色","68","四賢者","カスパー","カスパーズ","四色法師"]
 ["左飛","52左","701","左","左ドレ","49左","52左龍"]
@@ -132,15 +124,4 @@ NAME="""
 ["狼王","狼","力卡溫","狼人","リカント","力","小棟","力王"]
 ["不死鳥","鳥","bird","火鳥","紫","フェニ","BIRD"]
 ["克特","隊長","話島","阿塔","ROSE","rose","カーツ"]
-"""
-
-OUT_TEXT="""
-清除:資料庫重建、
-出:時間BoSS顯示、
-名稱:現有代號、
-紀錄:時間+名稱
-ex.0101 不死鳥
-2021/05/02 -新增輸入提示
-2021/06/04 -modify,bird 8H,bossname 
-2011/11/17 -modify,巨飛,卡,變
 """

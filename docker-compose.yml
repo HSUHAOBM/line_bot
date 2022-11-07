@@ -1,0 +1,29 @@
+version: "3.9"
+services:
+  db:
+    image: postgres
+    container_name: postgres_db_line_bot
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  web:
+    build: .
+    image: flask_web
+    container_name: web_line_bot
+    restart: always
+    expose:
+    - 5500
+    volumes:
+      - .:/app
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - TZ=Asia/Taipei
+    depends_on:
+      - db
+volumes:
+  postgres_data:
