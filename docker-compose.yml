@@ -1,5 +1,17 @@
 version: "3.9"
 services:
+  web:
+    build: .
+    container_name: web
+    restart: always
+    ports:
+      - "8000:5000"
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+    environment:
+      - TZ=Asia/Taipei
   db:
     image: postgres
     container_name: postgres_db_line_bot
@@ -9,21 +21,5 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-  web:
-    build: .
-    image: flask_web
-    container_name: web_line_bot
-    restart: always
-    expose:
-    - 5500
-    volumes:
-      - .:/app
-    environment:
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - TZ=Asia/Taipei
-    depends_on:
-      - db
 volumes:
   postgres_data:

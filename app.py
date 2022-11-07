@@ -1,6 +1,3 @@
-#軍
-
-from __future__ import unicode_literals
 import os
 from flask import Flask, request, abort,render_template
 from linebot import LineBotApi, WebhookHandler
@@ -23,6 +20,7 @@ handler = WebhookHandler(config.get('line', 'channel_secret'))
 
 @app.route("/")
 def home():
+    db.test()
     return 'Web App with Python Flask!'
 
 # 接收 LINE 的資訊
@@ -50,11 +48,16 @@ def handle_message(event):
         print('使用者輸入',input_text)
         try:
             if len(input_text.split())==1:
+                # 初始
+                if input_text == "建立紀錄表":
+                    db.create_table()
+
                 # 介紹
                 if input_text == "指令":
                     line_bot_api.reply_message(event.reply_token, TextSendMessage(
                         text='''清除:資料庫重建、\n出:時間BoSS顯示、\n
                                 名稱:現有代號、\n紀錄:時間+名稱 \n ex.0101 不死鳥'''))
+
                 # 初始化DB
                 if input_text == "清除":
                     print('清除')

@@ -43,9 +43,9 @@ init_data =[
 # port = "5432"
 
 host = "db"
-dbname = os.environ.get('POSTGRES_NAME')
-user = os.environ.get('POSTGRES_USER')
-password = os.environ.get('POSTGRES_PASSWORD')
+dbname = "postgres"
+user = "postgres"
+password = "postgres"
 sslmode = "allow"
 port = "5432"
 
@@ -131,7 +131,7 @@ def check_boss_time_record(): #檢查過期資料並上傳
      WHERE next_time IS NOT NULL
      AND CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Taipei' > next_time"""
     cursor.execute(query)
-    result=cursor.fetchall()
+    result = cursor.fetchall()
 
     for items in range(len(result)):
         boss_name = result[items][0]
@@ -173,7 +173,7 @@ def update_boss_time_record_out_text(update_list):
 
 
 #表初始建立欄位
-def CreadDB():
+def create_table():
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
     create_table_query ='''CREATE TABLE boss_time_record(
@@ -187,3 +187,6 @@ def CreadDB():
 
     cursor.close()
     conn.close()
+
+
+
