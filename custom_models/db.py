@@ -4,7 +4,7 @@ from custom_models import boss
 import os
 
 init_data =[
-    ('浮士德',None, None,None),
+    ('17',None, None,None),
     ('四色法師',None,None,None),
     ('52左龍',None,None,None),
     ('52右龍',None,None,None),
@@ -31,7 +31,8 @@ init_data =[
     ('死亡騎士', None,None,None),
     ('狼王', None,None,None),
     ('不死鳥', None,None,None),
-    ('克特', None,None,None)
+    ('克特', None,None,None),
+    ('18', None,None,None)
  ]
 
 # Update connection string information

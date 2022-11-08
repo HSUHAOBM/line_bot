@@ -1,6 +1,3 @@
-#新增資料庫更新功能
-
-import time
 import datetime
 from custom_models import db
 
@@ -24,24 +21,27 @@ def boss_record(text):
     # 取 真正名稱 重生區間
     boss_name , time_range = boss_list(name)
 
-    # 計算下次時間
-    next_time = end_time + time_range
+    if time_range:
+        message = ""
 
+        # 計算下次時間
+        next_time = end_time + time_range
 
-    #check input erorr
-    check_time_range = datetime.timedelta(days=0,hours=0,minutes=30,seconds=0)
-    now_time = datetime.datetime.now()
-    if( abs(end_time-now_time) > check_time_range):
-        message = "--- Time-Maybe-Error ---"
+        #check input erorr
+        check_time_range = datetime.timedelta(days=0,hours=0,minutes=30,seconds=0)
+        now_time = datetime.datetime.now()
 
-    # 更新資料庫
-    db.update_boss_time_record(boss_name, next_time, end_time)
+        if( abs(end_time-now_time) > check_time_range):
+            message = "\n--- Time-Maybe-Error ---"
 
-    # 轉 str
-    next_time = next_time.strftime('%m/%d %H:%M:%S')
-    end_time = end_time.strftime('%m/%d %H:%M:%S')
+        # 更新資料庫
+        db.update_boss_time_record(boss_name, next_time, end_time)
 
-    return boss_name, end_time, next_time, message
+        # 轉 str
+        next_time = next_time.strftime('%m/%d %H:%M:%S')
+        end_time = end_time.strftime('%m/%d %H:%M:%S')
+
+        return boss_name, end_time, next_time, message
 
 listboss001 = ["17","奇岩","浮士德","クライン"]
 listboss002 = ["4","4c","4C","4色","四色","68","四賢者","カスパー","カスパーズ","四色法師"]
@@ -71,6 +71,7 @@ listboss025 = ["死亡騎士","死騎","28","死","木村","騎","dead","DK","�
 listboss026 = ["狼王","狼","力卡溫","狼人","リカント","力","小棟","力王"]
 listboss027 = ["不死鳥","鳥","bird","火鳥","紫","フェニ","BIRD"]
 listboss028 = ["克特","隊長","話島","阿塔","ROSE","rose","カーツ"]
+listboss029 = ["18"]
 # BossTureNameList=["浮士德","四色法師","52左龍","52右龍","小綠","小紅","螞蟻","蜈蚣","49飛龍",
 #                   "51飛龍","大黑長者","卡王","強盜","鱷魚","樹精","巨大飛龍","暗黑長者","大足賽尼斯",
 #                   "伊弗利特","古代巨人","蜘蛛","變怪首領","惡魔監視者","死亡騎士","不死鳥","克特"]
@@ -78,8 +79,8 @@ listboss028 = ["克特","隊長","話島","阿塔","ROSE","rose","カーツ"]
 # 時間間隔
 def boss_list(name):
     if name in listboss001:
-        time_range = datetime.timedelta(days=0,hours=1,minutes=0,seconds=0)
-        boss_name = "浮士德"
+        time_range = datetime.timedelta(days=0,hours=6,minutes=0,seconds=0)
+        boss_name = "17"
         return boss_name, time_range
     elif name in listboss002:
         time_range = datetime.timedelta(days=0,hours=2,minutes=0,seconds=0)
@@ -143,7 +144,7 @@ def boss_list(name):
         return boss_name, time_range
     elif name in listboss017:
         boss_name = "暗黑長者"
-        time_range = datetime.timedelta(days=0,hours=6,minutes=0,seconds=0)
+        time_range = datetime.timedelta(days=0,hours=3,minutes=0,seconds=0)
         return boss_name, time_range
     elif name in listboss018:
         boss_name = "大足"
@@ -189,5 +190,9 @@ def boss_list(name):
         time_range = datetime.timedelta(days=0,hours=10,minutes=0,seconds=0)
         boss_name = "克特"
         return boss_name, time_range
+    elif name in listboss029:
+        time_range = datetime.timedelta(days=0,hours=7,minutes=0,seconds=0)
+        boss_name = "18"
+        return boss_name, time_range
     else:
-        pass
+        return boss_name, time_range

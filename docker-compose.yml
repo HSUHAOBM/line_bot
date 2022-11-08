@@ -12,6 +12,7 @@ services:
       - .:/app
     environment:
       - TZ=Asia/Taipei
+      - PYTHONUNBUFFERED=1
   db:
     image: postgres
     container_name: postgres_db_line_bot

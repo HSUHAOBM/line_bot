@@ -1,4 +1,3 @@
-import os
 from flask import Flask, request, abort,render_template
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
@@ -39,14 +38,12 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    print(event)
     # 驗證群組
     if event.source.group_id =="C5a67676a5c08556a78b107c1ec642106":
-
         input_text = event.message.text
-        print('使用者輸入',input_text)
+
         try:
-            if len(input_text.split())==1:
+            if len(input_text.split()) == 1:
                 # 初始
                 if input_text == "建立紀錄表":
                     db.create_table()
@@ -54,13 +51,10 @@ def handle_message(event):
                 # 介紹
                 if input_text == "指令":
                     line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                        text='''清除:資料庫重建、\n出:時間BoSS顯示、\n
-                                名稱:現有代號、\n紀錄:時間+名稱 \n ex.0101 不死鳥'''))
+                        text='''清除:資料庫重建、\n出:時間BoSS顯示、\n名稱:現有代號、\n紀錄:時間+名稱 \n ex.0101 不死鳥'''))
 
                 # 初始化DB
                 if input_text == "清除":
-                    print('清除')
-
                     line_bot_api.reply_message(event.reply_token,TextSendMessage(text="初始化"))
                     db.clear_boss_time_record()
                     db.reset_boss_time_record()
@@ -75,12 +69,14 @@ def handle_message(event):
                     listouttext = db.show_boss_time_record()
                     line_bot_api.reply_message(event.reply_token,TextSendMessage(text=outtext+listouttext))
 
-            else:
-                boss_name, end_time, next_time, message = boss.boss_record(event.message.text)
+            if len(input_text.split()) == 2:
+                boss_name, end_time, next_time, message = boss.boss_record(input_text)
+
                 line_bot_api.reply_message(event.reply_token,TextSendMessage(
-                    text = "BOSS："+ boss_name +"\n"+"死亡時間："+ end_time +"\n"+"重生時間："+next_time+"\n" + message))
+                    text = "BOSS："+ boss_name + "\n" + "死亡時間：" + end_time + "\n" + "重生時間：" + next_time + message))
         except:
-            line_bot_api.reply_message(event.reply_token,TextSendMessage(text="輸入錯誤"))
+            pass
+            # line_bot_api.reply_message(event.reply_token,TextSendMessage(text="輸入錯誤"))
 
 # 邀請事件
 @handler.add(JoinEvent)
