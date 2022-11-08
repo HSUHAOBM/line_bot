@@ -81,7 +81,7 @@ def handle_message(event):
 # 邀請事件
 @handler.add(JoinEvent)
 def handle_join(event):
-    newcoming_text = "Hello 此機器人已綁定特定用戶群"
+    newcoming_text = "Hello\n 此機器人已綁定特定用戶群\n\n ,問題反應信箱\nhao66bmbm@gmail.com"
 
     line_bot_api.reply_message(
         event.reply_token,
