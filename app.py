@@ -7,9 +7,6 @@ import configparser
 
 from custom_models import boss, db
 
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
 app = Flask(__name__)
 
 # LINE 聊天機器人的基本資料
@@ -44,7 +41,7 @@ def handle_message(event):
     # 使用者紀錄
     user_id = event.source.user_id
     profile = line_bot_api.get_profile(user_id)
-    app.logger.info(profile.display_name + '： ' + event.message.text)
+    app.logger.warning(profile.display_name + '： ' + event.message.text)
 
     # 驗證群組
     if event.source.type == "group":
