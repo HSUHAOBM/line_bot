@@ -7,6 +7,8 @@ import configparser
 
 from custom_models import boss, db
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 
@@ -38,45 +40,52 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+
+    # 使用者紀錄
+    user_id = event.source.user_id
+    profile = line_bot_api.get_profile(user_id)
+    app.logger.info(profile.display_name + '： ' + event.message.text)
+
     # 驗證群組
-    if event.source.group_id =="C5a67676a5c08556a78b107c1ec642106":
-        input_text = event.message.text
+    if event.source.type == "group":
+        if event.source.group_id == "C5a67676a5c08556a78b107c1ec642106":
+            input_text = event.message.text
 
-        try:
-            if len(input_text.split()) == 1:
-                # 初始
-                if input_text == "建立紀錄表":
-                    db.create_table()
+            try:
+                if len(input_text.split()) == 1:
+                    # 初始
+                    if input_text == "建立紀錄表":
+                        db.create_table()
 
-                # 介紹
-                if input_text == "指令":
-                    line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                        text='''清除:資料庫重建、\n出:時間BoSS顯示、\n名稱:現有代號、\n紀錄:時間+名稱 \n ex.0101 不死鳥'''))
+                    # 介紹
+                    if input_text == "指令":
+                        line_bot_api.reply_message(event.reply_token, TextSendMessage(
+                            text='''清除:資料庫重建、\n出:時間BoSS顯示、\n名稱:現有代號、\n紀錄:時間+名稱 \n ex.0101 不死鳥'''))
 
-                # 初始化DB
-                if input_text == "清除":
-                    line_bot_api.reply_message(event.reply_token,TextSendMessage(text="初始化"))
-                    db.clear_boss_time_record()
-                    db.reset_boss_time_record()
+                    # 初始化DB
+                    if input_text == "清除":
+                        line_bot_api.reply_message(event.reply_token,TextSendMessage(text="初始化"))
+                        db.clear_boss_time_record()
+                        db.reset_boss_time_record()
 
-                # 王代稱
-                if input_text == "名稱":
-                    line_bot_api.reply_message(event.reply_token,TextSendMessage(text=boss_nick_name))
+                    # 王代稱
+                    if input_text == "名稱":
+                        line_bot_api.reply_message(event.reply_token,TextSendMessage(text=boss_nick_name))
 
-                # 回報王表
-                if input_text == "出":
-                    outtext = db.check_boss_time_record()
-                    listouttext = db.show_boss_time_record()
-                    line_bot_api.reply_message(event.reply_token,TextSendMessage(text=outtext+listouttext))
+                    # 回報王表
+                    if input_text == "出":
+                        outtext = db.check_boss_time_record()
+                        listouttext = db.show_boss_time_record()
+                        line_bot_api.reply_message(event.reply_token,TextSendMessage(text=outtext+listouttext))
 
-            if len(input_text.split()) == 2:
-                boss_name, end_time, next_time, message = boss.boss_record(input_text)
+                if len(input_text.split()) == 2:
+                    boss_name, end_time, next_time, message = boss.boss_record(input_text)
 
-                line_bot_api.reply_message(event.reply_token,TextSendMessage(
-                    text = "BOSS："+ boss_name + "\n" + "死亡時間：" + end_time + "\n" + "重生時間：" + next_time + message))
-        except:
-            pass
-            # line_bot_api.reply_message(event.reply_token,TextSendMessage(text="輸入錯誤"))
+                    line_bot_api.reply_message(event.reply_token,TextSendMessage(
+                        text = "BOSS："+ boss_name + "\n" + "死亡時間：" + end_time + "\n" + "重生時間：" + next_time + message))
+            except:
+                pass
+                # line_bot_api.reply_message(event.reply_token,TextSendMessage(text="輸入錯誤"))
     else:
         line_bot_api.reply_message(event.reply_token,TextSendMessage(text="Hello\n 此機器人已綁定特定用戶群\n\n 問題反應信箱\nhao66bmbm@gmail.com"))
 
