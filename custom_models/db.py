@@ -129,20 +129,25 @@ def check_boss_time_record(): #檢查過期資料並上傳
     cursor = conn.cursor()
     # 下次出現時間 != 空 , 且 下次出現時間已經過了
     query = """SELECT * FROM boss_time_record
-     WHERE next_time IS NOT NULL
-     AND CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Taipei' > next_time"""
+     WHERE
+     next_time IS NOT NULL
+     AND
+     CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Taipei' > next_time"""
     cursor.execute(query)
     result = cursor.fetchall()
 
-    for items in range(len(result)):
-        boss_name = result[items][0]
-        next_time = result[items][1]
-        out_text = result[items][3]
+    for items in result:
+        boss_name = items[0]
+        next_time = items[1]
+        out_text = items[3]
+
         #取得姓名和間隔
         boss_name, time_range = boss.boss_list(boss_name)
+
         #檢查過期資料
         next_time, out_text = record_compute(next_time, time_range, out_text)
         update_list.append([next_time, out_text, boss_name])
+
     #更新資料至資料庫
     update_boss_time_record_out_text(update_list)
 
@@ -155,10 +160,13 @@ def record_compute(next_time, time_range, out_text):
     now_time = datetime.datetime.now()
     if out_text == None:
         out_text = 0
+    else:
+        out_text = int(out_text)
 
     while now_time > next_time:
         next_time = next_time + time_range
         out_text += 1
+
     return next_time, out_text
 
 def update_boss_time_record_out_text(update_list):
